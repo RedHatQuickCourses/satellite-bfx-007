@@ -1,5 +1,5 @@
-name: REPLACEREPONAME
-title: FIXME Course Title
+name: satellite-bfx-007
+title: Breakfix 7
 version: 1
 nav:
 - modules/ROOT/nav.adoc
