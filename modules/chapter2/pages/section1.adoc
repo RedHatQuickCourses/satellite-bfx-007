@@ -1,3 +1,177 @@
-= Guided solution (page 1 of 2)
+= Guided Solution (1 of 1)
+:experimental:
 
-FIXME: Provide step-by-step instructions here to resolve the issue.
+== Objectives
+
+* Investigate why DNF is failing to install the package .
+* Solve the issue related to the package installation for the concerned content source.
+
+== Instructions
+
+Run the following instructions on the `node1` system with `root` as the user.
+
+.Sample output:
+----
+[cloud-user@node1 ~]$ sudo su -
+[root@node1 ~]#
+----
+
+- Try to install install katello-pull-transport-migrate and you should see that it fails with 404 errors and its getting its content capsule.
++
+.Sample output
+----
+...
+...
+[root@node1 ~]# dnf install katello-pull-transport-migrate
+Updating Subscription Management repositories.
+Red Hat Satellite Client 6 for RHEL 8 x86_64 (RPMs)                                                                                                                                 62  B/s |  14  B     00:00    
+Errors during downloading metadata for repository 'satellite-client-6-for-rhel-8-x86_64-rpms':
+  - Status code: 404 for https://capsule.lab.sandbox-xhhqj-ocp4-cluster.svc.cluster.local/pulp/content/Default_Organization/test/cv1/content/dist/layered/rhel8/x86_64/sat-client/6/os/repodata/repomd.xml (IP: 10.128.38.126)
+Error: Failed to download metadata for repo 'satellite-client-6-for-rhel-8-x86_64-rpms': Cannot download repomd.xml: Cannot download repodata/repomd.xml: All mirrors were tried
+...
+...
+...
+----
+
+- Now to isolate if this is capsule sync issue or issue with satellite repo sync on content view metadata, lets move/register this host directly to satellite. For simplification of steps we would register the host to the satellite using the below steps:
++ 
+----
+ Satellite web ui -> Hosts -> Register Hosts
+ 
+ Keep the Capsule field blank
+ 
+ Click on the checkbox for insecure
+ 
+ Go to the Advanced tab
+ 
+ Setup REX -> No
+ 
+ Setup Insights -> No
+ 
+ Click on the checkbox for Ignore errors
+ 
+ Click on the checkbox for force
+ 
+ Click on Generate
+ 
+ Now copy and paste the generated command on the client node1
+----
+
+- As a next step move the client to `Library` life cycle environment and `Default Organization View` as content view:
++
+----
+Satellite web ui -> Hosts -> All Hosts -> Search and click on the client node1
+
+Overview tab -> Content view environment -> click on the 3 dots
+
+Select lifecycle environment as Library
+
+Select content view as Default Organization View
+
+Save
+----
+
+- Now run the below commands on `node1` and you should the error code has changed to 500
++
+----
+ # rm -rf /var/cache/dnf
+ # dnf install katello-pull-transport-migrate
+  Updating Subscription Management repositories.
+  Red Hat Satellite Client 6 for RHEL 8 x86_64 (RPMs)                                                                                                                                116  B/s |  55  B     00:00    
+  Errors during downloading metadata for repository 'satellite-client-6-for-rhel-8-x86_64-rpms':
+   - Status code: 500 for https://satellite.xhhqj.apps.ocpv09.dal13.infra.demo.redhat.com/pulp/content/Default_Organization/Library/content/dist/layered/rhel8/x86_64/sat-client/6/os/repodata/repomd.xml (IP: 10.129.67.89)
+  Error: Failed to download metadata for repo 'satellite-client-6-for-rhel-8-x86_64-rpms': Cannot download repomd.xml: Cannot download repodata/repomd.xml: All mirrors were tried
+----
+
+- Checking `/var/log/messages` on `satellite` you should see the actual error is about artifact missing
++
+----
+Mar 25 02:03:33 satellite pulpcore-content[18876]: FileNotFoundError: [Errno 2] No such file or directory: '/var/lib/pulp/media/artifact/77/a37d66c466271eea204498ff47e40a8009c2559c57847b2b390831d7514a04'
+Mar 25 02:03:33 satellite pulpcore-content[18876]: [25/Mar/2026:06:03:33 +0000] "GET /pulp/content/Default_Organization/Library/content/dist/layered/rhel8/x86_64/sat-client/6/os/repodata/repomd.xml HTTP/1.1" 500 247 "-" "libdnf (Red Hat Enterprise Linux 8.10; generic; Linux.x86_64)"
+----
+
+[NOTE]
+You may receive the same error for `appstream` or `baseos` repo as well.
+
+- So this confirms the issue on `satellite` server and we need to perform the below steps on satellite server web ui to fix the issue.
++
+Start with `complete sync` of the repositories.
++
+----
+Satellite web ui -> Content -> Products -> Red Hat Enterprise Linux for x86_64
+
+Click on "Red Hat Enterprise Linux 8 for x86_64 - BaseOS RPMs 8" -> Select action -> Advanced Sync -> Complete sync -> Sync
+
+Satellite web ui -> Content -> Products -> Red Hat Enterprise Linux for x86_64
+
+Click on "Red Hat Enterprise Linux 8 for x86_64 - AppStream RPMs 8" -> Select action -> Advanced Sync -> Complete sync -> Sync
+
+Satellite web ui -> Content -> Products -> Red Hat Enterprise Linux for x86_64
+
+Click on "Red Hat Satellite Client 6 for RHEL 8 x86_64 RPMs" -> Select action -> Advanced Sync -> Complete sync -> Sync
+----
+
+- Now perform `Verify Content Checksum` , once the above steps complete
++
+----
+atellite web ui -> Content -> Products -> Red Hat Enterprise Linux for x86_64
+
+Click on "Red Hat Enterprise Linux 8 for x86_64 - BaseOS RPMs 8" -> Select action -> Verify Content Checksum
+
+Satellite web ui -> Content -> Products -> Red Hat Enterprise Linux for x86_64
+
+Click on "Red Hat Enterprise Linux 8 for x86_64 - AppStream RPMs 8" -> Select action -> Verify Content Checksum
+
+Satellite web ui -> Content -> Products -> Red Hat Enterprise Linux for x86_64
+
+Click on "Red Hat Satellite Client 6 for RHEL 8 x86_64 RPMs" -> Select action -> Verify Content Checksum
+----
+
+- Now publish a new version of the conten view `cv1` and promote it to `Test` once the above steps complete
++
+----
+Satellite web ui -> Content -> Lifecycle -> Content Views -> cv1
+Publish new version -> click on check box for promote -> Click on check box for Test
+Next -> Finish
+----
+
+- Now perform a `complete sync` of the capsule once the above steps complete
++
+----
+Satellite web ui -> Infrastructure -> Capsules -> Concerned capsule
+Synchronize -> Complete sync
+----
+
+- Time to move the client `node1` back to the capsule. So create the registration command again, this time with capsule
++
+----
+ Satellite web ui -> Hosts -> Register Hosts
+ 
+ Capsule -> Select the capsule
+ 
+ Click on the checkbox for insecure
+ 
+ Go to the Advanced tab
+ 
+ Setup REX -> No
+ 
+ Setup Insights -> No
+ 
+ Click on the checkbox for Ignore errors
+ 
+ Click on the checkbox for force
+ 
+ Click on Generate
+ 
+ Now copy and paste the generated command on the client node1
+----
+
+ - Now finally perform the installation on the client and you should see it getting completed successfully
++
+[source,bash,role=execute]
+----
+ subscription-manager refresh
+ rm -rf /var/cache/dnf
+ yum intall katello-pull-transport-migrate -y
+----
+ 

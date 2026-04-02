@@ -1,5 +1,5 @@
 name: satellite-bfx-007
-title: Breakfix 7
+title: "Break-fix Practice: Fixing DNF with Satellite 6"
 version: 1
 nav:
 - modules/ROOT/nav.adoc
