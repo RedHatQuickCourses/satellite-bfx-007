@@ -3,9 +3,9 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Check your work :: Breakfix 007</title>
+    <title>Break-fix Scenario :: Satellite Breakfix 6</title>
     <link rel="prev" href="section1.html">
-    <link rel="next" href="../chapter2/index.html">
+    <link rel="next" href="section3.html">
     <meta name="generator" content="Antora 3.1.3">
     <link rel="stylesheet" href="../../../_/css/site.css">
     <script>var uiRootPath = '../../../_'</script>
@@ -15,7 +15,7 @@
   <nav class="navbar">
     <div class="navbar-brand">
       <a class="navbar-item" href="https://www.redhat.com" target="_blank"><img src="../../../_/img/redhat-logo.png" height="40px" alt="Red Hat"></a>
-      <a class="navbar-item" style="font-size: 24px; color: white" href="../../..">Breakfix 007</a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="../../..">Satellite Breakfix 6</a>
       <button class="navbar-burger" data-target="topbar-nav">
         <span></span>
         <span></span>
@@ -35,7 +35,7 @@
     <div class="panels">
 <div class="nav-panel-menu is-active" data-panel="menu">
   <nav class="nav-menu">
-    <h3 class="title"><a href="../index.html">Breakfix 7</a></h3>
+    <h3 class="title"><a href="../index.html">Break-fix Practice: Fixing DNF with Satellite 6</a></h3>
 <ul class="nav-list">
   <li class="nav-item" data-depth="0">
 <ul class="nav-list">
@@ -61,7 +61,10 @@
     <a class="nav-link" href="section1.html">Break-fix activity</a>
   </li>
   <li class="nav-item is-current-page" data-depth="2">
-    <a class="nav-link" href="section2.html">Check your work</a>
+    <a class="nav-link" href="section2.html">Break-fix Scenario</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="section3.html">Check your work</a>
   </li>
 </ul>
   </li>
@@ -74,10 +77,7 @@
     <a class="nav-link" href="../chapter2/index.html">Guided solution</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../chapter2/section1.html">Guided solution (page 1 of 2)</a>
-  </li>
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../chapter2/section2.html">Guided solution (page 2 of 2)</a>
+    <a class="nav-link" href="../chapter2/section1.html">Guided Solution (1 of 1)</a>
   </li>
 </ul>
   </li>
@@ -95,12 +95,12 @@
 </div>
 <div class="nav-panel-explore" data-panel="explore">
   <div class="context">
-    <span class="title">Breakfix 7</span>
+    <span class="title">Break-fix Practice: Fixing DNF with Satellite 6</span>
     <span class="version">1</span>
   </div>
   <ul class="components">
     <li class="component is-current">
-      <a class="title" href="../index.html">Breakfix 7</a>
+      <a class="title" href="../index.html">Break-fix Practice: Fixing DNF with Satellite 6</a>
       <ul class="versions">
         <li class="version is-current is-latest">
           <a href="../index.html">1</a>
@@ -118,9 +118,9 @@
   <a href="../index.html" class="home-link"></a>
 <nav class="breadcrumbs" aria-label="breadcrumbs">
   <ul>
-    <li><a href="../index.html">Breakfix 7</a></li>
+    <li><a href="../index.html">Break-fix Practice: Fixing DNF with Satellite 6</a></li>
     <li><a href="index.html">What’s in this break-fix?</a></li>
-    <li><a href="section2.html">Check your work</a></li>
+    <li><a href="section2.html">Break-fix Scenario</a></li>
   </ul>
 </nav>
 </div>
@@ -129,45 +129,67 @@
   <div class="toc-menu"></div>
 </aside>
 <article class="doc">
-<h1 class="page">Check your work</h1>
-<div class="sect1">
-<h2 id="_follow_below_steps_in_the_lab_to_check_your_work"><a class="anchor" href="#_follow_below_steps_in_the_lab_to_check_your_work"></a>Follow below steps in the lab to check your work</h2>
+<h1 class="page">Break-fix Scenario</h1>
+<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>FIXME: Add the instructions to be followed in the lab environment to make sure the problem has been resolved. You may chose to remove this block if grading script is provided in the lab to check the work.</p>
+<p>A RHEL8 client system <code>node1</code> is registered to <code>Red Hat Satellite 6.17</code> but DNF fails to install <code>katello-pull-transport-migrate</code> rpm for pull based remote execution on it.</p>
+</div>
+<div class="paragraph">
+<p>Here is error the message:</p>
+</div>
+<div class="listingblock">
+<div class="title">Sample output</div>
+<div class="content">
+<pre>...
+...
+[root@node1 ~]# dnf install katello-pull-transport-migrate
+Updating Subscription Management repositories.
+Red Hat Satellite Client 6 for RHEL 8 x86_64 (RPMs)                                                                                                                                 62  B/s |  14  B     00:00
+Errors during downloading metadata for repository 'satellite-client-6-for-rhel-8-x86_64-rpms':
+  - Status code: 404 for https://capsule.lab.sandbox-xhhqj-ocp4-cluster.svc.cluster.local/pulp/content/Default_Organization/test/cv1/content/dist/layered/rhel8/x86_64/sat-client/6/os/repodata/repomd.xml (IP: 10.128.38.126)
+Error: Failed to download metadata for repo 'satellite-client-6-for-rhel-8-x86_64-rpms': Cannot download repomd.xml: Cannot download repodata/repomd.xml: All mirrors were tried
+...
+...
+...</pre>
+</div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_check_your_work_using_the_grading_script"><a class="anchor" href="#_check_your_work_using_the_grading_script"></a>Check your work using the grading script</h2>
+<h2 id="_objectives"><a class="anchor" href="#_objectives"></a>Objectives</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>Investigate why DNF is failing to install the package .</p>
+</li>
+<li>
+<p>Solve the issue related to the package installation for the concerned content source.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_recreate_scenario"><a class="anchor" href="#_recreate_scenario"></a>Recreate Scenario</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>After you have resolved the issue and met the success criteria, login to <code>FIXME</code> system as <code>FIXME</code> user and run the grading script as shown here to check your work:</p>
+<p>To recreate this scenario, run the <code>lab</code> script on the <code>bastion</code> server.</p>
 </div>
 <div class="listingblock execute">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">break-fix-script grade</code></pre>
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">lab break breakfix1</code></pre>
 </div>
 </div>
 <div class="listingblock">
 <div class="title">Sample output</div>
 <div class="content">
-<pre>[root@classroom ~]# break-fix-script grade
-Initiating break-fix-script with option grade
-Grading.  Please wait.
-Success.
-COMPLETION CODE: &lt;check your output for this value&gt;
-Completed break-fix-script with option grade successfully</pre>
+<pre>[lab-user@bastion ~]$ lab break breakfix1
+Initiating /usr/local/bin/lab with option(s) break breakfix1
+Completed /usr/local/bin/lab with option(s) break breakfix1 successfully</pre>
 </div>
 </div>
-<div class="paragraph">
-<p>FIXME: Remove the below block if no grading script is provided to check the work in the break-fix activity. In this case make sure you use the above block to provide step-by-step instructions learner can follow to check their work.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_submit_the_completion_code"><a class="anchor" href="#_submit_the_completion_code"></a>Submit the completion code</h2>
-<div class="sectionbody">
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -175,29 +197,41 @@ Completed break-fix-script with option grade successfully</pre>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-Skip this if not applicable for you.
+It may take 2-3 minutes to complete.
 </td>
 </tr>
 </table>
 </div>
-<div class="ulist">
-<ul>
-<li>
-<p>For RedHat internal audience: Submit that completion code <a href="https://link-to-appropriate-lms.com" target="_blank" rel="noopener">here</a> to receive a grade for this training</p>
-</li>
-<li>
-<p>For RedHat partners: Submit that completion code <a href="https://link-to-appropriate-lms.com" target="_blank" rel="noopener">here</a> to receive a grade for this training</p>
-</li>
-</ul>
 </div>
+</div>
+<div class="sect1">
+<h2 id="_success_criteria"><a class="anchor" href="#_success_criteria"></a>Success Criteria</h2>
+<div class="sectionbody">
 <div class="paragraph">
-<p>FIXME: Change the links in the above lines to the link for appropriate audience specific LMS where learner can provide completion code. Remove this block if submitting completion is not applicable.</p>
+<p>Ensure the <code>katello-pull-transport-migrate</code> is installed on <code>node1</code> from the correct content source.</p>
+</div>
+<div class="listingblock execute">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">rpm -qa | grep katello-pull-transport-migrate</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Sample output:</div>
+<div class="content">
+<pre>...
+...
+
+katello-pull-transport-migrate-1.x.x
+
+...
+...</pre>
+</div>
 </div>
 </div>
 </div>
 <nav class="pagination">
   <span class="prev"><a href="section1.html">Break-fix activity</a></span>
-  <span class="next"><a href="../chapter2/index.html">Guided solution</a></span>
+  <span class="next"><a href="section3.html">Check your work</a></span>
 </nav>
 </article>
   </div>
