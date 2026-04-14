@@ -20,7 +20,7 @@ In this exercise, you will diagnose and resolve a package installation failure c
 [root@node1 ~]#
 ----
 
-* Try to install install katello-pull-transport-migrate and you should see that it fails with 404 errors and its getting its content capsule.
+* Try to install install katello-pull-transport-migrate and you should see that it fails with 404 errors and its getting its content from capsule.
 +
 [source,subs="verbatim,quotes"]
 ----
@@ -32,7 +32,7 @@ Errors during downloading metadata for repository 'satellite-client-6-for-rhel-8
 Error: Failed to download metadata for repo 'satellite-client-6-for-rhel-8-x86_64-rpms': Cannot download repomd.xml: Cannot download repodata/repomd.xml: All mirrors were tried
 ----
 
-* Now to isolate if this is capsule sync issue or issue with satellite repo sync on content view metadata, lets move/register this host directly to satellite. For simplification of steps we would register the host to the satellite using the below steps:
+* Now to isolate if this is capsule sync issue or issue with satellite repo sync or content view metadata, lets move/register this host directly to satellite. For simplification of steps we would register the host to the satellite using the below steps:
 . Satellite web ui -> Hosts -> Register Hosts, keep the **Capsule** field blank and click on the checkbox for **insecure**:
 +
 image::dnf.png[align="center"]
