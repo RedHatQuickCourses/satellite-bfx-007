@@ -136,10 +136,13 @@
 <div class="ulist">
 <ul>
 <li>
-<p>Investigate why DNF is failing to install the package .</p>
+<p>Investigate why dnf fails to install a package.</p>
 </li>
 <li>
-<p>Solve the issue related to the package installation for the concerned content source.</p>
+<p>Identify whether the issue originates from Capsule sync or Satellite content.</p>
+</li>
+<li>
+<p>Resolve repository/content inconsistencies to restore package installation.</p>
 </li>
 </ul>
 </div>
@@ -149,98 +152,123 @@
 <h2 id="_instructions"><a class="anchor" href="#_instructions"></a>Instructions</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Run the following instructions on the <code>node1</code> system with <code>root</code> as the user.</p>
-</div>
-<div class="listingblock">
-<div class="title">Sample output:</div>
-<div class="content">
-<pre>[cloud-user@node1 ~]$ sudo su -
-[root@node1 ~]#</pre>
-</div>
+<p>In this exercise, you will diagnose and resolve a package installation failure caused by missing or unsynchronized content in a Red Hat Satellite environment.</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
+<p>Verify the Issue on the Client. Log in to node1 as the root user:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">[lab-user@bastion ~]$ <strong>sudo ssh node1</strong>
+[cloud-user@node1 ~]$ <strong>sudo su -</strong>
+[root@node1 ~]#</code></pre>
+</div>
+</div>
+</li>
+<li>
 <p>Try to install install katello-pull-transport-migrate and you should see that it fails with 404 errors and its getting its content capsule.</p>
 <div class="listingblock">
-<div class="title">Sample output</div>
 <div class="content">
-<pre>...
-...
-[root@node1 ~]# dnf install katello-pull-transport-migrate
+<pre class="highlightjs highlight"><code class="language-none hljs">[root@node1 ~]# <strong>dnf install katello-pull-transport-migrate</strong>
 Updating Subscription Management repositories.
 Red Hat Satellite Client 6 for RHEL 8 x86_64 (RPMs)                                                                                                                                 62  B/s |  14  B     00:00
 Errors during downloading metadata for repository 'satellite-client-6-for-rhel-8-x86_64-rpms':
   - Status code: 404 for https://capsule.lab.sandbox-xhhqj-ocp4-cluster.svc.cluster.local/pulp/content/Default_Organization/test/cv1/content/dist/layered/rhel8/x86_64/sat-client/6/os/repodata/repomd.xml (IP: 10.128.38.126)
-Error: Failed to download metadata for repo 'satellite-client-6-for-rhel-8-x86_64-rpms': Cannot download repomd.xml: Cannot download repodata/repomd.xml: All mirrors were tried
-...
-...
-...</pre>
+Error: Failed to download metadata for repo 'satellite-client-6-for-rhel-8-x86_64-rpms': Cannot download repomd.xml: Cannot download repodata/repomd.xml: All mirrors were tried</code></pre>
 </div>
 </div>
 </li>
 <li>
 <p>Now to isolate if this is capsule sync issue or issue with satellite repo sync on content view metadata, lets move/register this host directly to satellite. For simplification of steps we would register the host to the satellite using the below steps:</p>
-<div class="listingblock">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Satellite web ui &#8594; Hosts &#8594; Register Hosts, keep the <strong>Capsule</strong> field blank and click on the checkbox for <strong>insecure</strong>:</p>
+<div class="imageblock text-center">
 <div class="content">
-<pre> Satellite web ui -&gt; Hosts -&gt; Register Hosts
-
- Keep the Capsule field blank
-
- Click on the checkbox for insecure
-
- Go to the Advanced tab
-
- Setup REX -&gt; No
-
- Setup Insights -&gt; No
-
- Click on the checkbox for Ignore errors
-
- Click on the checkbox for force
-
- Click on Generate
-
- Now copy and paste the generated command on the client node1</pre>
+<img src="_images/dnf.png" alt="dnf">
 </div>
 </div>
 </li>
 <li>
-<p>As a next step move the client to <code>Library</code> life cycle environment and <code>Default Organization View</code> as content view:</p>
-<div class="listingblock">
+<p>Go to the <strong>Advanced</strong> tab, setup <strong>REX &#8594; No</strong> and setup <strong>Insights &#8594; No</strong>, click on the checkbox for <strong>Ignore errors</strong>, click on the checkbox for <strong>Force</strong> and select on <strong>Generate</strong>:</p>
+<div class="imageblock text-center">
 <div class="content">
-<pre>Satellite web ui -&gt; Hosts -&gt; All Hosts -&gt; Search and click on the client node1
-
-Overview tab -&gt; Content view environment -&gt; click on the 3 dots
-
-Select lifecycle environment as Library
-
-Select content view as Default Organization View
-
-Save</pre>
+<img src="_images/adv.png" alt="adv">
 </div>
 </div>
 </li>
 <li>
-<p>Now run the below commands on <code>node1</code> and you should the error code has changed to 500</p>
+<p>Copy and paste the generated command on the client node1</p>
+<div class="imageblock text-center">
+<div class="content">
+<img src="_images/op.png" alt="op">
+</div>
+</div>
+<div class="paragraph">
+<p>Sample Output</p>
+</div>
 <div class="listingblock">
 <div class="content">
-<pre> # rm -rf /var/cache/dnf
- # dnf install katello-pull-transport-migrate
+<pre class="highlightjs highlight"><code class="language-none hljs">[root@node1 ~]# set -o pipefail &amp;&amp; curl --silent --show-error  --insecure 'https://satellite.p27vh.apps.ocpvdev01.rhdp.net/register?activation_keys=ak1&amp;download_utility=curl&amp;force=true&amp;ignore_subman_errors=true&amp;location_id=2&amp;organization_id=1&amp;setup_insights=false&amp;setup_remote_execution=false&amp;update_packages=false' --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo0LCJpYXQiOjE3NzYxNTE3MDAsImp0aSI6ImU1OTZiNTc2NTM2MmM2NzJkZWI5NTIwYzk1MGMxMDQzNDM1OWJlMzE0Zjk3NGI1ZGQ5Mjc2YzZjMzg0MjMwOTciLCJleHAiOjE3NzYxNjYxMDAsInNjb3BlIjoicmVnaXN0cmF0aW9uI2dsb2JhbCByZWdpc3RyYXRpb24jaG9zdCJ9.OhGxoN1gUJOmKCc-pjYd_fmt-VI-uK0hrCTsiM2ZisU' | bash</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>As a next step move the client to <code>Library</code> life cycle environment and <code>Default Organization View</code> as content view.</p>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Navigate to satellite web ui &#8594; Hosts &#8594; All Hosts &#8594; Search and click on the client node1</p>
+<div class="imageblock text-center">
+<div class="content">
+<img src="_images/node1.png" alt="node1">
+</div>
+</div>
+</li>
+<li>
+<p>Select Overview tab &#8594; Content view environment &#8594; click on the 3 dots &#8594; select <strong>Edit content view environments</strong>:</p>
+<div class="imageblock text-center">
+<div class="content">
+<img src="_images/select.png" alt="select">
+</div>
+</div>
+</li>
+<li>
+<p>Select lifecycle environment as <strong>Library</strong> and select content view as <strong>Default Organization View</strong> and select <strong>Save</strong>:</p>
+<div class="imageblock text-center">
+<div class="content">
+<img src="_images/view.png" alt="view">
+</div>
+</div>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Run the below commands on <code>node1</code> and you should the error code has changed to 500. Clear cache and retry installation:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-none hljs">[root@node1 ~]# rm -rf /var/cache/dnf
+[root@node1 ~]# dnf install katello-pull-transport-migrate
   Updating Subscription Management repositories.
   Red Hat Satellite Client 6 for RHEL 8 x86_64 (RPMs)                                                                                                                                116  B/s |  55  B     00:00
   Errors during downloading metadata for repository 'satellite-client-6-for-rhel-8-x86_64-rpms':
    - Status code: 500 for https://satellite.xhhqj.apps.ocpv09.dal13.infra.demo.redhat.com/pulp/content/Default_Organization/Library/content/dist/layered/rhel8/x86_64/sat-client/6/os/repodata/repomd.xml (IP: 10.129.67.89)
-  Error: Failed to download metadata for repo 'satellite-client-6-for-rhel-8-x86_64-rpms': Cannot download repomd.xml: Cannot download repodata/repomd.xml: All mirrors were tried</pre>
+  Error: Failed to download metadata for repo 'satellite-client-6-for-rhel-8-x86_64-rpms': Cannot download repomd.xml: Cannot download repodata/repomd.xml: All mirrors were tried</code></pre>
 </div>
 </div>
 </li>
 <li>
-<p>Checking <code>/var/log/messages</code> on <code>satellite</code> you should see the actual error is about artifact missing</p>
+<p>Check <code>/var/log/messages</code> on <code>satellite</code> and you should see the actual error is about artifact missing:</p>
 <div class="listingblock">
 <div class="content">
-<pre>Mar 25 02:03:33 satellite pulpcore-content[18876]: FileNotFoundError: [Errno 2] No such file or directory: '/var/lib/pulp/media/artifact/77/a37d66c466271eea204498ff47e40a8009c2559c57847b2b390831d7514a04'
-Mar 25 02:03:33 satellite pulpcore-content[18876]: [25/Mar/2026:06:03:33 +0000] "GET /pulp/content/Default_Organization/Library/content/dist/layered/rhel8/x86_64/sat-client/6/os/repodata/repomd.xml HTTP/1.1" 500 247 "-" "libdnf (Red Hat Enterprise Linux 8.10; generic; Linux.x86_64)"</pre>
+<pre class="highlightjs highlight"><code class="language-none hljs">Mar 25 02:03:33 satellite pulpcore-content[18876]: FileNotFoundError: [Errno 2] No such file or directory: '/var/lib/pulp/media/artifact/77/a37d66c466271eea204498ff47e40a8009c2559c57847b2b390831d7514a04'
+Mar 25 02:03:33 satellite pulpcore-content[18876]: [25/Mar/2026:06:03:33 +0000] "GET /pulp/content/Default_Organization/Library/content/dist/layered/rhel8/x86_64/sat-client/6/os/repodata/repomd.xml HTTP/1.1" 500 247 "-" "libdnf (Red Hat Enterprise Linux 8.10; generic; Linux.x86_64)"</code></pre>
 </div>
 </div>
 </li>
@@ -261,96 +289,144 @@ You may receive the same error for <code>appstream</code> or <code>baseos</code>
 <div class="ulist">
 <ul>
 <li>
-<p>So this confirms the issue on <code>satellite</code> server and we need to perform the below steps on satellite server web ui to fix the issue.</p>
-<div class="paragraph">
-<p>Start with <code>complete sync</code> of the repositories.</p>
-</div>
-<div class="listingblock">
+<p>So this confirms the issue on <code>satellite</code> server and we need to perform the below steps on satellite server web ui to fix the issue. Start with <code>complete sync</code> of the repositories.</p>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Navigate to <strong>Satellite Web UI</strong> &#8594; and select <strong>Content</strong> &#8594; select <strong>Products</strong> &#8594; select <strong>Red Hat Enterprise Linux for x86_64</strong></p>
+<div class="imageblock text-center">
 <div class="content">
-<pre>Satellite web ui -&gt; Content -&gt; Products -&gt; Red Hat Enterprise Linux for x86_64
-
-Click on "Red Hat Enterprise Linux 8 for x86_64 - BaseOS RPMs 8" -&gt; Select action -&gt; Advanced Sync -&gt; Complete sync -&gt; Sync
-
-Satellite web ui -&gt; Content -&gt; Products -&gt; Red Hat Enterprise Linux for x86_64
-
-Click on "Red Hat Enterprise Linux 8 for x86_64 - AppStream RPMs 8" -&gt; Select action -&gt; Advanced Sync -&gt; Complete sync -&gt; Sync
-
-Satellite web ui -&gt; Content -&gt; Products -&gt; Red Hat Enterprise Linux for x86_64
-
-Click on "Red Hat Satellite Client 6 for RHEL 8 x86_64 RPMs" -&gt; Select action -&gt; Advanced Sync -&gt; Complete sync -&gt; Sync</pre>
+<img src="_images/rhel.png" alt="rhel">
 </div>
+</div>
+</li>
+<li>
+<p>Click on <strong>Red Hat Enterprise Linux 8 for x86_64 - BaseOS RPMs 8</strong> &#8594; click <strong>Select Action</strong> &#8594; <strong>Advanced Sync</strong> &#8594; <strong>Complete sync</strong> &#8594; <strong>Sync</strong>:</p>
+<div class="imageblock text-center">
+<div class="content">
+<img src="_images/sync.png" alt="sync">
+</div>
+</div>
+<div class="paragraph">
+<p>The sync should looks as below:</p>
+</div>
+<div class="imageblock text-center">
+<div class="content">
+<img src="_images/sync3.png" alt="sync3">
+</div>
+</div>
+</li>
+<li>
+<p>Select <strong>Content</strong> &#8594; <strong>Products</strong> &#8594; <strong>Red Hat Enterprise Linux for x86_64</strong> &#8594; Click on <strong>Red Hat Enterprise Linux 8 for x86_64 - AppStream RPMs 8</strong> &#8594; click <strong>Select Action</strong> &#8594; Advanced Sync &#8594; Complete sync &#8594; Sync</p>
+<div class="imageblock text-center">
+<div class="content">
+<img src="_images/sync4.png" alt="sync4">
+</div>
+</div>
+</li>
+<li>
+<p>Select <strong>Content</strong> &#8594; <strong>Products</strong> &#8594; <strong>Red Hat Enterprise Linux for x86_64</strong> &#8594; Click on "Red Hat Satellite Client 6 for RHEL 8 x86_64 RPMs" &#8594; Select action &#8594; Advanced Sync &#8594; Complete sync &#8594; Sync</p>
+<div class="imageblock text-center">
+<div class="content">
+<img src="_images/sync5.png" alt="sync5">
+</div>
+</div>
+</li>
+</ol>
 </div>
 </li>
 <li>
 <p>Now perform <code>Verify Content Checksum</code> , once the above steps complete</p>
-<div class="listingblock">
-<div class="content">
-<pre>atellite web ui -&gt; Content -&gt; Products -&gt; Red Hat Enterprise Linux for x86_64
-
-Click on "Red Hat Enterprise Linux 8 for x86_64 - BaseOS RPMs 8" -&gt; Select action -&gt; Verify Content Checksum
-
-Satellite web ui -&gt; Content -&gt; Products -&gt; Red Hat Enterprise Linux for x86_64
-
-Click on "Red Hat Enterprise Linux 8 for x86_64 - AppStream RPMs 8" -&gt; Select action -&gt; Verify Content Checksum
-
-Satellite web ui -&gt; Content -&gt; Products -&gt; Red Hat Enterprise Linux for x86_64
-
-Click on "Red Hat Satellite Client 6 for RHEL 8 x86_64 RPMs" -&gt; Select action -&gt; Verify Content Checksum</pre>
-</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Select <strong>Content</strong> &#8594; Products &#8594; <strong>Red Hat Enterprise Linux for x86_64</strong>, click on <strong>Red Hat Enterprise Linux 8 for x86_64 - BaseOS RPMs 8</strong> &#8594; Select action &#8594; Verify Content Checksum</p>
+</li>
+<li>
+<p>Select <strong>Content</strong> &#8594; Products &#8594; <strong>Red Hat Enterprise Linux for x86_64</strong>, click on <strong>Red Hat Enterprise Linux 8 for x86_64 - AppStream RPMs 8</strong> &#8594; Select action &#8594; Verify Content Checksum</p>
+</li>
+<li>
+<p>Select <strong>Content</strong> &#8594; Products &#8594; <strong>Red Hat Enterprise Linux for x86_64</strong>, click on <strong>Red Hat Satellite Client 6 for RHEL 8 x86_64 RPMs</strong> &#8594; Select action &#8594; Verify Content Checksum</p>
+</li>
+</ol>
 </div>
 </li>
 <li>
 <p>Now publish a new version of the conten view <code>cv1</code> and promote it to <code>Test</code> once the above steps complete</p>
-<div class="listingblock">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Navigate to <strong>Content</strong> &#8594; Lifecycle &#8594; Content Views &#8594; cv1</p>
+<div class="imageblock text-center">
 <div class="content">
-<pre>Satellite web ui -&gt; Content -&gt; Lifecycle -&gt; Content Views -&gt; cv1
-Publish new version -&gt; click on check box for promote -&gt; Click on check box for Test
-Next -&gt; Finish</pre>
+<img src="_images/new.png" alt="new">
 </div>
+</div>
+</li>
+<li>
+<p>Publish new version &#8594; click on check box for promote &#8594; Click on check box for Test, select Next &#8594; Finish</p>
+<div class="imageblock text-center">
+<div class="content">
+<img src="_images/new2.png" alt="new2">
+</div>
+</div>
+</li>
+</ol>
 </div>
 </li>
 <li>
 <p>Now perform a <code>complete sync</code> of the capsule once the above steps complete</p>
-<div class="listingblock">
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Navigate to <strong>Infrastructure</strong> &#8594; Capsules &#8594; Concerned capsule &#8594; Select <strong>Synchronize</strong> &#8594; <strong>Complete sync</strong></p>
+<div class="imageblock text-center">
 <div class="content">
-<pre>Satellite web ui -&gt; Infrastructure -&gt; Capsules -&gt; Concerned capsule
-Synchronize -&gt; Complete sync</pre>
+<img src="_images/new4.png" alt="new4">
 </div>
 </div>
 </li>
-<li>
-<p>Time to move the client <code>node1</code> back to the capsule. So create the registration command again, this time with capsule</p>
-<div class="listingblock">
-<div class="content">
-<pre> Satellite web ui -&gt; Hosts -&gt; Register Hosts
-
- Capsule -&gt; Select the capsule
-
- Click on the checkbox for insecure
-
- Go to the Advanced tab
-
- Setup REX -&gt; No
-
- Setup Insights -&gt; No
-
- Click on the checkbox for Ignore errors
-
- Click on the checkbox for force
-
- Click on Generate
-
- Now copy and paste the generated command on the client node1</pre>
+</ol>
 </div>
+</li>
+<li>
+<p>Move the client <code>node1</code> back to the capsule. So create the registration command again, this time with capsule:</p>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Navigate to <strong>Hosts</strong> &#8594; Register Hosts &#8594; Capsule &#8594; Select the capsule &#8594; click on the checkbox for insecure:</p>
+</li>
+<li>
+<p>Go to the Advanced tab</p>
+</li>
+<li>
+<p>Setup REX &#8594; No</p>
+</li>
+<li>
+<p>Setup Insights &#8594; No</p>
+</li>
+<li>
+<p>Click on the checkbox for Ignore errors</p>
+</li>
+<li>
+<p>Click on the checkbox for force</p>
+</li>
+<li>
+<p>Click on Generate</p>
+</li>
+<li>
+<p>Now copy and paste the generated command on the client node1</p>
+</li>
+</ol>
 </div>
 </li>
 <li>
 <p>Now finally perform the installation on the client and you should see it getting completed successfully</p>
-<div class="listingblock execute">
+<div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash"> subscription-manager refresh
- rm -rf /var/cache/dnf
- yum intall katello-pull-transport-migrate -y</code></pre>
+<pre class="highlightjs highlight"><code class="language-none hljs">[root@node1 ~]# subscription-manager refresh
+[root@node1 ~]# rm -rf /var/cache/dnf
+[root@node1 ~]# yum intall katello-pull-transport-migrate -y</code></pre>
 </div>
 </div>
 </li>
