@@ -167,7 +167,7 @@
 </div>
 </li>
 <li>
-<p>Try to install install katello-pull-transport-migrate and you should see that it fails with 404 errors and its getting its content capsule.</p>
+<p>Try to install install katello-pull-transport-migrate and you should see that it fails with 404 errors and its getting its content from capsule.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-none hljs">[root@node1 ~]# <strong>dnf install katello-pull-transport-migrate</strong>
@@ -180,7 +180,7 @@ Error: Failed to download metadata for repo 'satellite-client-6-for-rhel-8-x86_6
 </div>
 </li>
 <li>
-<p>Now to isolate if this is capsule sync issue or issue with satellite repo sync on content view metadata, lets move/register this host directly to satellite. For simplification of steps we would register the host to the satellite using the below steps:</p>
+<p>Now to isolate if this is capsule sync issue or issue with satellite repo sync or content view metadata, lets move/register this host directly to satellite. For simplification of steps we would register the host to the satellite using the below steps:</p>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
