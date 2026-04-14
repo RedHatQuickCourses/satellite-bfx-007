@@ -1,6 +1,6 @@
 = Appendix
 
-We have a solution article documentating similar issues & more details:
+Reference solution article documentating similar issues & more details:
  https://access.redhat.com/solutions/6961905
  +
  This usually happens when the artifacts were downloaded once and thereafter they were deleted manually/accidentally from `/var/lib/pulp` .

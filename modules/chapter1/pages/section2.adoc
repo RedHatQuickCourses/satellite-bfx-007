@@ -2,22 +2,22 @@
 
 A RHEL8 client system `node1` is registered to `Red Hat Satellite 6.17` but DNF fails to install `katello-pull-transport-migrate` rpm for pull based remote execution on it.
 
-Here is error the message:
-
-.Sample output
+* Here is error the message:
++
+====
+[source,subs="verbatim,quotes"]
 ----
-...
-...
-[root@node1 ~]# dnf install katello-pull-transport-migrate
+[lab-user@bastion ~]$ **sudo ssh node1**
+[cloud-user@node1 ~]$ **sudo su -**
+[root@node1 ~]# **dnf install katello-pull-transport-migrate**
 Updating Subscription Management repositories.
 Red Hat Satellite Client 6 for RHEL 8 x86_64 (RPMs)                                                                                                                                 62  B/s |  14  B     00:00    
 Errors during downloading metadata for repository 'satellite-client-6-for-rhel-8-x86_64-rpms':
   - Status code: 404 for https://capsule.lab.sandbox-xhhqj-ocp4-cluster.svc.cluster.local/pulp/content/Default_Organization/test/cv1/content/dist/layered/rhel8/x86_64/sat-client/6/os/repodata/repomd.xml (IP: 10.128.38.126)
 Error: Failed to download metadata for repo 'satellite-client-6-for-rhel-8-x86_64-rpms': Cannot download repomd.xml: Cannot download repodata/repomd.xml: All mirrors were tried
 ...
-...
-...
 ----
+====
 
 == Objectives
 
@@ -26,39 +26,30 @@ Error: Failed to download metadata for repo 'satellite-client-6-for-rhel-8-x86_6
 
 == Recreate Scenario
 
-To recreate this scenario, run the `lab` script on the `bastion` server.
-
-[source,bash,role=execute]
+* To recreate this scenario, run the `lab` script on the `bastion` server.
++
+====
+[source,subs="verbatim,quotes"]
 ----
-lab break breakfix1
-----
-
-.Sample output
-----
-[lab-user@bastion ~]$ lab break breakfix1
+[lab-user@bastion ~]$ **lab break breakfix1**
 Initiating /usr/local/bin/lab with option(s) break breakfix1
 Completed /usr/local/bin/lab with option(s) break breakfix1 successfully
 ----
+====
 
 [NOTE]
 It may take 2-3 minutes to complete.
 
 == Success Criteria
 
-Ensure the `katello-pull-transport-migrate` is installed on `node1` from the correct content source.
-
-[source,bash,role=execute]
+* Ensure the `katello-pull-transport-migrate` is installed on `node1` from the correct content source.
++
+====
+[source,subs="verbatim,quotes"]
 ----
-rpm -qa | grep katello-pull-transport-migrate
-----
-
-.Sample output:
-----
-...
-...
-
+[lab-user@bastion ~]$ **sudo ssh node1**
+[cloud-user@node1 ~]$ **sudo su -**
+[root@node1 ~]# **rpm -qa | grep katello-pull-transport-migrate**
 katello-pull-transport-migrate-1.x.x
-
-...
-...
 ----
+====
