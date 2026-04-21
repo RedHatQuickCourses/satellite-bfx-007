@@ -1,5 +1,5 @@
 name: satellite-bfx-007
-title: "Break-fix Practice: Fixing DNF with Satellite 6"
+title: "Break-fix Practice: Fixing DNF with Red Hat Satellite 6"
 version: 1
 nav:
 - modules/ROOT/nav.adoc

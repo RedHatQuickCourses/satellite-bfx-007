@@ -1,4 +1,4 @@
-= Fixing DNF with Satellite 6
+= Fixing DNF with Red Hat Satellite 6
 :navtitle: Home
 
 == Introduction
@@ -7,7 +7,7 @@
 - Red Hat Satellite 6
 - Red Hat Enterprise Linux 8
 
-=== Break-fix Practice: Fixing DNF with Satellite 6
+=== Break-fix Practice: Fixing DNF with Red Hat Satellite 6
 
 Description:
 This break-fix training simulates a problem with dnf on a registered Red Hat Satellite client machine. You'll investigate and solve the problem in a hands-on lab environment to complete the training.

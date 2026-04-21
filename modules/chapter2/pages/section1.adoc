@@ -11,7 +11,7 @@
 
 In this exercise, you will diagnose and resolve a package installation failure caused by missing or unsynchronized content in a Red Hat Satellite environment.
 
-* Verify the Issue on the Client. Log in to node1 as the root user:
+* Verify the Issue on the client. Log in to node1 as the root user:
 +
 [source,subs="verbatim,quotes"]
 ----
