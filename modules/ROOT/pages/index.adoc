@@ -10,6 +10,6 @@
 === Break-fix Practice: Fixing DNF with Satellite 6
 
 Description:
-This break-fix training simulates a problem with dnf on a registered client of satellite . You'll investigate and solve the problem in a hands-on lab environment to complete the training.
+This break-fix training simulates a problem with dnf on a registered Red Hat Satellite client machine. You'll investigate and solve the problem in a hands-on lab environment to complete the training.
 
 NOTE: After ordering the lab run the lab preparation instruction only *ONCE*.
